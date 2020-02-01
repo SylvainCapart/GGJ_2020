@@ -50,6 +50,17 @@ public class PartsManager : MonoBehaviour
 
     }
 
+    public bool CheckSpotsFull()
+    {
+        bool full = true;
+        foreach (var spot in spots)
+        {
+            if (!spot.isTaken)
+                full = false;
+        }
+        return full;
+    }
+
     public void DisplayBind()
     {
         if (m_currentInteractable == null)
@@ -59,10 +70,18 @@ public class PartsManager : MonoBehaviour
             return;
         }
 
+        if (CheckSpotsFull())
+            return;
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             m_Rpressed = true;
             m_selectedIndex = (m_selectedIndex + 1) % spots.Length ;
+
+            while (spots[m_selectedIndex].isTaken)
+            {
+                m_selectedIndex = (m_selectedIndex + 1) % spots.Length;
+            }
         }
 
         Transform nearestSpot = GetNearestSpot(m_currentInteractable);
@@ -81,7 +100,7 @@ public class PartsManager : MonoBehaviour
         DisplayAttach(true);
         DisplayUI(true);
 
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && !spots[m_selectedIndex].isTaken)
         {
             Attach(m_currentInteractable);
         }
@@ -103,6 +122,9 @@ public class PartsManager : MonoBehaviour
             if (rend != null)
             {
                 rend.enabled = state;
+
+                if (spot.isTaken)
+                    rend.enabled = false;
             }
         }
     }
@@ -134,13 +156,16 @@ public class PartsManager : MonoBehaviour
 
         for (int i = 0; i < spots.Length; i++)
         {
-            float distance = Vector2.Distance(item.transform.position, spots[i].tr.transform.position);
-            if (distance < minDistance)
+            if (!spots[i].isTaken)
             {
-                nearestSpot = spots[i].tr;
-                minDistance = distance;
-                if (!m_Rpressed)
-                m_selectedIndex = i;
+                float distance = Vector2.Distance(item.transform.position, spots[i].tr.transform.position);
+                if (distance < minDistance)
+                {
+                    nearestSpot = spots[i].tr;
+                    minDistance = distance;
+                    if (!m_Rpressed)
+                        m_selectedIndex = i;
+                }
             }
         }
 
@@ -164,6 +189,7 @@ public class PartsManager : MonoBehaviour
 
             Vector3 vectorBind = spots[m_selectedIndex].tr.transform.position - item.transform.position;
             Vector3 vectorAttach = item.attach.position - item.transform.position;
+            Vector3 vectorInner = spots[m_selectedIndex].tr.transform.position - GameObject.FindGameObjectWithTag("Player").transform.position;
             float attachDiff = Vector2.Distance(item.attach.position, item.transform.position);
             float angle = Vector2.SignedAngle(vectorBind, vectorAttach);
 
@@ -172,7 +198,10 @@ public class PartsManager : MonoBehaviour
             item.transform.Rotate(0, 0, -angle);
             item.transform.position = spots[m_selectedIndex].tr.transform.position - vectorBind.normalized * (attachDiff + m_offset);
 
+            float innerAngle = Vector2.SignedAngle(vectorBind, vectorInner);
+            item.transform.Rotate(0, 0, -innerAngle);
 
+            spots[m_selectedIndex].isTaken = true;
         }
     }
 
