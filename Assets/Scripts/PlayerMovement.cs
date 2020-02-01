@@ -20,17 +20,17 @@ public class PlayerMovement : MonoBehaviour {
 	{
 		// Add a forward force		
 
-		if (Input.GetKey("d"))	// If the player is pressing the "d" key
+		if (Input.GetAxisRaw("Horizontal") == 1)	// If the player is pressing the "d" key
 		{
 			MoveForward();
 		}
 
-		if (Input.GetKey("a"))  // If the player is pressing the "a" key
+		if (Input.GetAxisRaw("Horizontal") == -1)  // If the player is pressing the "a" key
 		{
 			MoveBackWards();
 		}
 
-		if (Input.GetKeyDown("w"))  // If the player is pressing the "a" key
+		if (Input.GetAxisRaw("Vertical") == 1)  // If the player is pressing the "a" key
 		{
 			Jump();
 		}

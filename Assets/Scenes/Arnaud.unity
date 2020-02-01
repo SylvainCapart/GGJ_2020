@@ -1866,7 +1866,7 @@ MonoBehaviour:
   rb: {fileID: 702917268}
   forwardForce: 20
   upForceMoving: 0
-  upForceJumping: 500
+  upForceJumping: 200
 --- !u!114 &702917273
 MonoBehaviour:
   m_ObjectHideFlags: 0
