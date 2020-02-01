@@ -41,7 +41,7 @@ public class CharacterController2D : MonoBehaviour
 
 	private void Awake()
 	{
-		m_Rigidbody2D = GetComponent<Rigidbody2D>();
+
 
 		if (OnLandEvent == null)
 			OnLandEvent = new UnityEvent();
@@ -55,7 +55,7 @@ public class CharacterController2D : MonoBehaviour
 	private void FixedUpdate()
 	{
 		Vector2 velocityDenormalized = new Vector2(targetVelocity.x * playerMovement.movement.x * Time.fixedDeltaTime, targetVelocity.x * playerMovement.movement.y * Time.fixedDeltaTime);
-		Debug.Log("Set speed x to " + velocityDenormalized.x);				
+//		Debug.Log("Set speed x to " + velocityDenormalized.x);				
 		m_Rigidbody2D.velocity = Vector2.SmoothDamp(m_Rigidbody2D.velocity, velocityDenormalized, ref currentVelocity, m_MovementSmoothing, maxVelocity*Time.deltaTime);
 		// bool wasGrounded = m_Grounded;
 		// m_Grounded = false;

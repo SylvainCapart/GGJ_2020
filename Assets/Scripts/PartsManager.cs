@@ -3,16 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+
 public class PartsManager : MonoBehaviour
 {
     public enum SpotIndex { HEAD, ARMLEFT, ARMRIGHT, LEGLEFT, LEGRIGHT };
 
-    public Transform[] spots;
+    [System.Serializable]
+    public struct Spot
+    {
+        public Transform tr;
+        public bool isTaken;
+    }
+
+    public Spot[] spots;
+    public bool[] spotsTaken;
 
     private List<Interactable> itemDetectedList = new List<Interactable>();
-    private Interactable m_currentInteractable;
-    public Transform m_AttachQuestion; 
-    
+    public Interactable m_currentInteractable;
+    public Transform m_AttachQuestion;
+    public bool m_Rpressed = false;
+    public int m_selectedIndex = 0;
+    public SpotIndex m_SelectedSpot;
+    public float m_offset;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,6 +46,7 @@ public class PartsManager : MonoBehaviour
         }
 
         DisplayBind();
+        m_SelectedSpot = (SpotIndex)m_selectedIndex;
 
     }
 
@@ -43,15 +59,32 @@ public class PartsManager : MonoBehaviour
             return;
         }
 
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            m_Rpressed = true;
+            m_selectedIndex = (m_selectedIndex + 1) % spots.Length ;
+        }
 
         Transform nearestSpot = GetNearestSpot(m_currentInteractable);
+        Vector3 spotPos = nearestSpot.transform.position;
+        if (!m_Rpressed)
+        {
+            //
+        }
+        else
+        {
+            spotPos = spots[m_selectedIndex].tr.transform.position;
+        }
 
-        //RaycastHit2D hit = Physics2D.Raycast(nearestSpot.transform.position, m_currentInteractable.transform.position, 50f);
+        DrawLine(spotPos, m_currentInteractable.transform.position, Color.cyan);
 
-        DrawLine(nearestSpot.transform.position, m_currentInteractable.transform.position, Color.cyan);
         DisplayAttach(true);
         DisplayUI(true);
 
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Attach(m_currentInteractable);
+        }
 
     }
 
@@ -66,7 +99,7 @@ public class PartsManager : MonoBehaviour
     {
         foreach (var spot in spots)
         {
-            SpriteRenderer rend = spot.GetComponent<SpriteRenderer>();
+            SpriteRenderer rend = spot.tr.GetComponent<SpriteRenderer>();
             if (rend != null)
             {
                 rend.enabled = state;
@@ -79,6 +112,7 @@ public class PartsManager : MonoBehaviour
         GameObject m_line = new GameObject();
         m_line.transform.position = start;
         m_line.AddComponent<LineRenderer>();
+ 
         LineRenderer lr = m_line.GetComponent<LineRenderer>();
         lr.material = new Material(Shader.Find("Unlit/NewUnlitShader"));
         lr.startColor = color;
@@ -87,6 +121,8 @@ public class PartsManager : MonoBehaviour
         lr.endWidth = 0.2f;
         lr.SetPosition(0, start);
         lr.SetPosition(1, end);
+        lr.sortingLayerName = "Default";
+        lr.sortingOrder = 5;
 
         GameObject.Destroy(m_line, duration);
     }
@@ -96,22 +132,48 @@ public class PartsManager : MonoBehaviour
         Transform nearestSpot = null;
         float minDistance = 10.0f;
 
-        foreach (var spot in spots)
+        for (int i = 0; i < spots.Length; i++)
         {
-            float distance = Vector2.Distance(item.transform.position, spot.transform.position);
+            float distance = Vector2.Distance(item.transform.position, spots[i].tr.transform.position);
             if (distance < minDistance)
             {
-                nearestSpot = spot;
+                nearestSpot = spots[i].tr;
                 minDistance = distance;
+                if (!m_Rpressed)
+                m_selectedIndex = i;
             }
         }
+
+        //nearestSpot = spots[(int)m_selectedIndex].transform;
 
         return nearestSpot;
     }
 
-    public void Attach()
+    public void Attach(Interactable item)
     {
+        m_Rpressed = false;
 
+        Rigidbody2D itemRB = item.GetComponent<Rigidbody2D>();
+
+        if (itemRB != null)
+        {
+            HingeJoint2D hingejoint = gameObject.AddComponent<HingeJoint2D>();
+            hingejoint.breakForce = 1000;
+            hingejoint.breakTorque = 1000;
+            hingejoint.connectedBody = itemRB;
+
+            Vector3 vectorBind = spots[m_selectedIndex].tr.transform.position - item.transform.position;
+            Vector3 vectorAttach = item.attach.position - item.transform.position;
+            float attachDiff = Vector2.Distance(item.attach.position, item.transform.position);
+            float angle = Vector2.SignedAngle(vectorBind, vectorAttach);
+
+
+            itemRB.constraints = RigidbodyConstraints2D.FreezeRotation;
+            item.transform.Rotate(0, 0, -angle);
+            item.transform.position = spots[m_selectedIndex].tr.transform.position - vectorBind.normalized * (attachDiff + m_offset);
+
+
+        }
     }
 
     public Interactable Detect()
@@ -119,15 +181,17 @@ public class PartsManager : MonoBehaviour
         float minDistance = 10.0f;
         Interactable nearestInteractable = null;
 
-        foreach (var item in itemDetectedList)
+        for (int i = 0; i < itemDetectedList.Count; i++)
         {
-            float distance = Vector2.Distance(item.transform.position, transform.position);
+            float distance = Vector2.Distance(itemDetectedList[i].transform.position, transform.position);
             if (distance < minDistance)
             {
-                nearestInteractable = item;
+                nearestInteractable = itemDetectedList[i];
                 minDistance = distance;
+
             }
         }
+
         return nearestInteractable;
     }
 
@@ -138,6 +202,7 @@ public class PartsManager : MonoBehaviour
         if (item != null && !itemDetectedList.Contains(item))
         {
             itemDetectedList.Add(item);
+            m_Rpressed = false;
         }
     }
 
@@ -148,6 +213,7 @@ public class PartsManager : MonoBehaviour
         if (item != null && itemDetectedList.Contains(item))
         {
             itemDetectedList.Remove(item);
+            m_Rpressed = false;
         }
     }
 
