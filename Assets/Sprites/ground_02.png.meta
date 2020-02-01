@@ -69,7 +69,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 128
@@ -129,9 +129,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 256
-        width: 128
-        height: 128
+        y: 0
+        width: 384
+        height: 384
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,8 +146,57 @@ TextureImporter:
       - - {x: 29.122223, y: 41.974792}
         - {x: 24.024445, y: 44.78}
         - {x: 26.390373, y: 41.68222}
-      physicsShape: []
-      tessellationDetail: 0
+      physicsShape:
+      - - {x: 174, y: -158}
+        - {x: 184, y: -147}
+        - {x: 192, y: -124}
+        - {x: 192, y: 106}
+        - {x: 190, y: 115}
+        - {x: 183, y: 134}
+        - {x: 172, y: 149}
+        - {x: 168, y: 154}
+        - {x: 162, y: 158}
+        - {x: 157, y: 163}
+        - {x: 148, y: 168}
+        - {x: 134, y: 174}
+        - {x: 115, y: 179}
+        - {x: 106, y: 180}
+        - {x: 98, y: 180}
+        - {x: 87, y: 179}
+        - {x: 65, y: 179}
+        - {x: 57, y: 178}
+        - {x: 47, y: 179}
+        - {x: 37, y: 180}
+        - {x: 14, y: 180}
+        - {x: 8, y: 179}
+        - {x: 0, y: 180}
+        - {x: -16, y: 180}
+        - {x: -23, y: 180}
+        - {x: -34, y: 180}
+        - {x: -54, y: 180}
+        - {x: -64, y: 182}
+        - {x: -68, y: 182}
+        - {x: -76, y: 182}
+        - {x: -86, y: 182}
+        - {x: -121, y: 179}
+        - {x: -136, y: 173}
+        - {x: -146, y: 166}
+        - {x: -150, y: 165}
+        - {x: -155, y: 163}
+        - {x: -166, y: 153}
+        - {x: -187, y: 123}
+        - {x: -192, y: 110}
+        - {x: -192, y: -121}
+        - {x: -191, y: -128}
+        - {x: -180, y: -152}
+        - {x: -166, y: -167}
+        - {x: -146, y: -183}
+        - {x: -130, y: -190}
+        - {x: -120, y: -192}
+        - {x: 119, y: -192}
+        - {x: 136, y: -188}
+        - {x: 151, y: -180}
+      tessellationDetail: 0.16
       bones: []
       spriteID: 40c3e529ac9604c84871611d12364a28
       internalID: 2382636779520128953
