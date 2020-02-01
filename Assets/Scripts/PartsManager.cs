@@ -58,6 +58,7 @@ public class PartsManager : MonoBehaviour
     public void DisplayUI(bool state)
     {
         m_AttachQuestion.gameObject.SetActive(state);
+        m_AttachQuestion.transform.rotation = Quaternion.Euler(0, 0, 0);
     }
 
 
