@@ -30,18 +30,20 @@ public class Tiling : MonoBehaviour {
         spriteWidth = sRenderer.sprite.bounds.size.x;
 		
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		if (hasLeftBuddy == false || hasRightBuddy == false)
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        // calculate the camera's extent ( half the width ) of what the camera can see in world coodinates
+        float camHorizontalExtent = cam.orthographicSize * Screen.width / Screen.height;
+
+        // calculate the x position where the camera can see the edge of the sprite
+        float edgeVisiblePositionRight = (myTransform.position.x + spriteWidth / 2) - camHorizontalExtent;
+        float edgeVisiblePositionLeft = (myTransform.position.x - spriteWidth / 2) + camHorizontalExtent;
+
+        if (hasLeftBuddy == false || hasRightBuddy == false)
         {
-            // calculate the camera's extent ( half the width ) of what the camera can see in world coodinates
-            float camHorizontalExtent = cam.orthographicSize * Screen.width / Screen.height;
-
-            // calculate the x position where the camera can see the edge of the sprite
-            float edgeVisiblePositionRight = (myTransform.position.x + spriteWidth / 2) - camHorizontalExtent;
-            float edgeVisiblePositionLeft = (myTransform.position.x - spriteWidth / 2) + camHorizontalExtent;
-
             // can we see the edge of the element and the call MakeNewBuddy if we can
             if (cam.transform.position.x >= edgeVisiblePositionRight - offsetX && !hasRightBuddy)
             {
@@ -54,7 +56,7 @@ public class Tiling : MonoBehaviour {
                 hasLeftBuddy = true;
             }
         }
-	}
+    }
 
     // creates a new buddy on the side required
     void MakeNewBuddy(int rightOrLeft)
