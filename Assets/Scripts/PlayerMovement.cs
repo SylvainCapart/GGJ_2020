@@ -6,16 +6,13 @@ public class PlayerMovement : MonoBehaviour {
 	// This is a reference to the Rigidbody component called "rb"
 	public Rigidbody2D rb;
 	
-	public Rigidbody rb1;
-	
-
 	public float forwardForce = 10f;	// Variable that determines the forward force
-	public float upForce = 10f;  // Variable that determines the sideways force
+	public float upForceMoving = 10f;  // Variable that determines the sideways force
+	public float upForceJumping = 50f;
 	private Vector2 force;
 
 	void Start()
 	{
-		force.Set(forwardForce, upForce);
 	}
 	// We marked this as "Fixed"Update because we
 	// are using it to mess with physics.
@@ -25,16 +22,38 @@ public class PlayerMovement : MonoBehaviour {
 
 		if (Input.GetKey("d"))	// If the player is pressing the "d" key
 		{
-			force.Set(forwardForce, upForce);
-			rb.AddForce(force);
+			MoveForward();
 		}
 
 		if (Input.GetKey("a"))  // If the player is pressing the "a" key
 		{
-			force.Set(-forwardForce, upForce);
+			MoveBackWards();
+		}
+
+		if (Input.GetKeyDown("w"))  // If the player is pressing the "a" key
+		{
+			Jump();
+		}
+	}
+	void MoveForward()
+	{
+		force.Set(forwardForce, upForceMoving);
+		rb.AddForce(force);
+	}
+
+	void MoveBackWards()
+	{
+		force.Set(-forwardForce, upForceMoving);
+		rb.AddForce(force);
+	}
+
+	void Jump()
+	{
+		if (rb.transform.position.y <1)
+		{
+			force.Set(0, upForceJumping);
 			rb.AddForce(force);
-			// Add a force to the left
-			//rb.AddForce(-sidewaysForce * Time.deltaTime, 0, 0);
 		}
 	}
 }
+
