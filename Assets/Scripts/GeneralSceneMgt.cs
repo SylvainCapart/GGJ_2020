@@ -3,9 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class GeneralSceneMgt : MonoBehaviour
 {
-    public enum SceneIndex {MENU, GAME};
+    public enum SceneIndex {MENU, GAME, ENDGAME};
 
     public static GeneralSceneMgt instance;
+    public SceneIndex sceneIndex;
 
     private void Awake()
     {
@@ -25,9 +26,9 @@ public class GeneralSceneMgt : MonoBehaviour
         }
     }
 
-    public void GoToScene(SceneIndex scene_index)
+    public void GoToScene()
     {
-        SceneManager.LoadScene((int)scene_index);
+        SceneManager.LoadScene((int)sceneIndex);
     }
 
     public void GoToMenu()
