@@ -458,7 +458,6 @@ public class PartsManager : MonoBehaviour
         if (item != null && !itemDetectedList.Contains(item))
         {
             itemDetectedList.Add(item);
-            Debug.Log("ENTER");
             m_ObjectEnters = true;
 
         }
