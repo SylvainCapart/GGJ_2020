@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class ArmHit : MonoBehaviour
 {
-    public Animator m_Anim;
-    // Start is called before the first frame update
+
+
+    private float oldRotation;
+    public float m_angle;
     void Start()
     {
         
@@ -15,10 +17,22 @@ public class ArmHit : MonoBehaviour
     void Update()
     {
 
-        if ( Input.GetKeyDown(KeyCode.F) && tag == "Player")
+        if (tag != "Player")
         {
-            m_Anim.Play("ArmHit");
+            //
         }
+
+        if ( tag == "Player")
+        {
+            if (Input.GetKey(KeyCode.F))
+            {
+                transform.Rotate(0, 0, m_angle);
+            }
+  
+        }
+
+
+
         
 
 
