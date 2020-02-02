@@ -94,6 +94,8 @@ public class CharacterController2D : MonoBehaviour
                 }
             }
 
+
+
             //if (Input.GetKeyUp(KeyCode.LeftShift))
             //{
             //    foreach (var spot in m_PartsManager.spots)
@@ -110,6 +112,17 @@ public class CharacterController2D : MonoBehaviour
             //    }
 
             //}
+        }
+        if (playerMovement.movement.x != 0 || playerMovement.movement.y != 0)
+        {
+            if (durabilityManager.decrementDurability() == false || m_Rigidbody2D.position.y < -1)
+            {
+
+                Vector2 newPosition = new Vector2(respawnPoint.transform.position.x, respawnPoint.transform.position.y);
+                transform.position = newPosition;
+                // m_Rigidbody2D.MovePosition(newPosition);
+                durabilityManager.resetDurability();
+            }
         }
     }
 
@@ -212,13 +225,5 @@ public class CharacterController2D : MonoBehaviour
 	}
 	
 
-			if(durabilityManager.decrementDurability() == false || m_Rigidbody2D.position.y <-1)
-		{
-		if (playerMovement.movement.x !=0 || playerMovement.movement.y !=0)
-				Vector2 newPosition = new Vector2(respawnPoint.transform.position.x,respawnPoint.transform.position.y);
-			{
-				m_Rigidbody2D.MovePosition(newPosition);
-				durabilityManager.resetDurability();
-			}
-		}
+
 }
