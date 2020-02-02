@@ -63,6 +63,14 @@ public class DurabilityManager : MonoBehaviour
             durability--;
         }
     }
+    public void augmentDurability(int value)
+    {
+        durability += value;
+        if (durability >durabilityMax)
+        {
+            durability = durabilityMax;
+        }
+    }
 
     //Return values: false if value out of range, true if ok
     public bool setDurability(int value)
