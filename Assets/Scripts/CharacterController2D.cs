@@ -203,7 +203,7 @@ public class CharacterController2D : MonoBehaviour
 	private void OnCollisionEnter2D(Collision2D other) {
 		if (other.transform.tag == "Ground")
 		{
-			Debug.Log("ResetJump called from OncollisionStay2D");
+			Debug.Log("ResetJump called from OncollisionEnter2D");
 			ResetJump();
 		}
 	}
