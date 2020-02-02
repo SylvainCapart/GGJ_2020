@@ -1,5 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+
 
 public class CharacterController2D : MonoBehaviour
 {
@@ -8,11 +10,11 @@ public class CharacterController2D : MonoBehaviour
 	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
 	//[SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
 	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
-	//[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
+	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
 	//[SerializeField] private Transform m_CeilingCheck;							// A position marking where to check for ceilings
 	//[SerializeField] private Collider2D m_CrouchDisableCollider;				// A collider that will be disabled when crouching
-	//const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
-	private bool m_Grounded;            // Whether or not the player is grounded.
+	public float k_GroundedRadius = 2f; // Radius of the overlap circle to determine if grounded
+	public bool m_Grounded;            // Whether or not the player is grounded.
 	//const float k_CeilingRadius = .2f; // Radius of the overlap circle to determine if the player can stand up
 	public Rigidbody2D m_Rigidbody2D;
 	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
@@ -28,8 +30,7 @@ public class CharacterController2D : MonoBehaviour
 
     public float m_DeathYPos;
 
-    private bool called;
-
+	private bool called;
 	
 
 	public DurabilityManager durabilityManager;
@@ -47,6 +48,7 @@ public class CharacterController2D : MonoBehaviour
     public float m_rotateForce = 2;
 
 
+
 	private void Awake()
 	{
 		if (OnLandEvent == null)
@@ -56,10 +58,12 @@ public class CharacterController2D : MonoBehaviour
 			OnCrouchEvent = new BoolEvent();
 
 		called = false;
+		m_Grounded = true;
 	}
 
     private void FixedUpdate()
     {
+		bool wasGrounded = m_Grounded;
         bool oneTaken = HasOneSpotTakenAtLeast();
         if (oneTaken)
         {
@@ -72,9 +76,7 @@ public class CharacterController2D : MonoBehaviour
 
         if (!m_PartsManager.m_Attaching)
         {
-            Vector2 velocityDenormalized = new Vector2(targetVelocity.x * playerMovement.movement.x * Time.fixedDeltaTime, targetVelocity.x * playerMovement.movement.y * Time.fixedDeltaTime);
-            m_Rigidbody2D.velocity = Vector2.SmoothDamp(m_Rigidbody2D.velocity, velocityDenormalized, ref currentVelocity, m_MovementSmoothing, maxVelocity * Time.deltaTime);
-
+            
             if (Input.GetKey(KeyCode.LeftShift) )
             {
                 //m_Rigidbody2D.rotation += m_rotateForce;
@@ -94,38 +96,18 @@ public class CharacterController2D : MonoBehaviour
 
                 }
             }
-
-
-
-            //if (Input.GetKeyUp(KeyCode.LeftShift))
-            //{
-            //    foreach (var spot in m_PartsManager.spots)
-            //    {
-            //        if (spot.isTaken)
-            //        {
-            //            //Rigidbody2D rb = spot.tr.transform.GetComponentInChildren<Rigidbody2D>();
-            //            //if (rb != null)
-            //            //{
-            //            //    rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            //            //}
-            //        }
-
-            //    }
-
-            //}
         }
-        if (playerMovement.movement.x != 0 || playerMovement.movement.y != 0)
-        {
-            if (durabilityManager.decrementDurability() == false || m_Rigidbody2D.position.y < m_DeathYPos)
-            {
-
-                Vector2 newPosition = new Vector2(respawnPoint.transform.position.x, respawnPoint.transform.position.y);
-                transform.position = newPosition;
-                // m_Rigidbody2D.MovePosition(newPosition);
-                durabilityManager.resetDurability();
-                m_PartsManager.DropAll();
-            }
-        }
+		
+		if (playerMovement.movement.y > 0)
+		{
+			Jump();		
+		}
+		if (playerMovement.movement.x != 0)
+		{
+			Move();		
+		}
+		CheckFall();
+		CheckDurability();
     }
 
     public bool HasOneSpotTakenAtLeast()
@@ -141,10 +123,51 @@ public class CharacterController2D : MonoBehaviour
         return taken;
     }
 
+	public void CheckFall()
+	{
+        if(m_Rigidbody2D.position.y < -1)
+		{
+			Respawn();
+		}
+	}
 
+	public void CheckDurability()
+	{
+		if (durabilityManager.getDurability() <= 0)
+		{
+			Respawn();
+		}
+	}
+
+	public void Respawn()
+	{
+		Vector2 newPosition = new Vector2(respawnPoint.transform.position.x, respawnPoint.transform.position.y);
+		transform.position = newPosition;
+		m_Rigidbody2D.velocity = Vector2.zero;
+		
+		durabilityManager.resetDurability();
+	}
+	public void Jump()
+	{
+		if (m_Grounded)
+		{
+			m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
+			m_Grounded = false;
+		}	
+	}
+	public void ResetJump()
+	{
+		m_Grounded = true;
+	}
 	public void Move()
 	{
-		
+		if (!m_PartsManager.m_Attaching)
+		{
+			Vector2 velocityDenormalized = new Vector2(targetVelocity.x * playerMovement.movement.x * Time.fixedDeltaTime, m_Rigidbody2D.velocity.y);
+        	m_Rigidbody2D.velocity = Vector2.SmoothDamp(m_Rigidbody2D.velocity, velocityDenormalized, ref currentVelocity, m_MovementSmoothing, maxVelocity * Time.deltaTime);
+			durabilityManager.decrementDurability();
+		}
+
 		// // If crouching, check to see if the character can stand up
 		// if (!crouch)
 		// {
@@ -155,55 +178,7 @@ public class CharacterController2D : MonoBehaviour
 		// 	}
 		// }
 
-		// //only control the player if grounded or airControl is turned on
-		// if (m_Grounded || m_AirControl)
-		// {
-
-		// 	// If crouching
-		// 	if (crouch)
-		// 	{
-		// 		if (!m_wasCrouching)
-		// 		{
-		// 			m_wasCrouching = true;
-		// 			OnCrouchEvent.Invoke(true);
-		// 		}
-
-		// 		// Reduce the speed by the crouchSpeed multiplier
-		// 		move *= m_CrouchSpeed;
-
-		// 		// Disable one of the colliders when crouching
-		// 		if (m_CrouchDisableCollider != null)
-		// 			m_CrouchDisableCollider.enabled = false;
-		// 	} else
-		// 	{
-		// 		// Enable the collider when not crouching
-		// 		if (m_CrouchDisableCollider != null)
-		// 			m_CrouchDisableCollider.enabled = true;
-
-		// 		if (m_wasCrouching)
-		// 		{
-		// 			m_wasCrouching = false;
-		// 			OnCrouchEvent.Invoke(false);
-		// 		}
-		// 	}
-
-		// 	// Move the character by finding the target velocity
-		// 	Vector3 targetVelocity = new Vector2(move * 10f, m_Rigidbody2D.velocity.y);
-		// 	// And then smoothing it out and applying it to the character
-		// 	m_Rigidbody2D.velocity = Vector3.SmoothDamp(m_Rigidbody2D.velocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
-
-		// 	// If the input is moving the player right and the player is facing left...
-		// 	if (move > 0 && !m_FacingRight)
-		// 	{
-		// 		// ... flip the player.
-		// 		Flip();
-		// 	}
-		// 	// Otherwise if the input is moving the player left and the player is facing right...
-		// 	else if (move < 0 && m_FacingRight)
-		// 	{
-		// 		// ... flip the player.
-		// 		Flip();
-		// 	}
+		
 		// }
 		// // If the player should jump...
 		// if (m_Grounded && jump)
@@ -213,7 +188,6 @@ public class CharacterController2D : MonoBehaviour
 		// 	m_Rigidbody2D.AddForce(new Vector2(0f, m_JumpForce));
 		// }
 	}
-
 
 	private void Flip()
 	{
@@ -225,7 +199,13 @@ public class CharacterController2D : MonoBehaviour
 		// theScale.x *= -1;
 		// transform.localScale = theScale;
 	}
-	
 
+	private void OnCollisionEnter2D(Collision2D other) {
+		if (other.transform.tag == "Ground")
+		{
+			Debug.Log("ResetJump called from OncollisionStay2D");
+			ResetJump();
+		}
+	}
 
-}
+ }

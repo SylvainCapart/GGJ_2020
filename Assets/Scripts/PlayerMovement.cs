@@ -15,7 +15,18 @@ public class PlayerMovement : MonoBehaviour {
 	
 	void Update()
 	{
-		movement.Set(Input.GetAxisRaw("Horizontal"), 0);
+		float horizontal = Input.GetAxisRaw("Horizontal");
+		float vertical;
+		bool verticalMove = Input.GetKeyDown(KeyCode.Space) ;
+		if (verticalMove)
+		{
+			vertical = 1;
+		}
+		else
+		{
+			vertical = 0;
+		}
+		movement.Set(horizontal, vertical);		
 	}
 	// void FixedUpdate ()
 	// {

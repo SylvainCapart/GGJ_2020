@@ -5,8 +5,10 @@ using UnityEngine;
 public class DurabilityManager : MonoBehaviour
 {
     
-    public int durability;
+    private int durability;
     public int durabilityMax;
+    public int fallDamage;
+    
 
     public StatusIndicator statusIndicator;
 
@@ -45,14 +47,21 @@ public class DurabilityManager : MonoBehaviour
     {
         durability = durabilityMax;
     }
-    public bool decrementDurability()
+
+    public void addFallDamage()
+    {
+        durability -= fallDamage;
+        if (durability <0)
+        {
+            durability = 0;
+        }
+    }
+    public void decrementDurability()
     {
         if (durability >0)
         {
             durability--;
-            return true;
         }
-        return false;
     }
 
     //Return values: false if value out of range, true if ok
@@ -64,6 +73,11 @@ public class DurabilityManager : MonoBehaviour
         }
         durability = value;
         return true;
+    }
+
+    public int getDurability()
+    {
+        return durability;
     }
 
 }
