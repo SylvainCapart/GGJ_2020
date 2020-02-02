@@ -22,7 +22,9 @@ public class CharacterController2D : MonoBehaviour
 	public Vector2 targetVelocity;
 
 	public float maxVelocity;
+	public GameObject respawnPoint; 
 	private Vector2 currentVelocity;
+
 
 	private bool called;
 
@@ -44,8 +46,6 @@ public class CharacterController2D : MonoBehaviour
 
 	private void Awake()
 	{
-
-
 		if (OnLandEvent == null)
 			OnLandEvent = new UnityEvent();
 
@@ -57,12 +57,14 @@ public class CharacterController2D : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		Vector2 velocityDenormalized = new Vector2(targetVelocity.x * playerMovement.movement.x * Time.fixedDeltaTime, targetVelocity.x * playerMovement.movement.y * Time.fixedDeltaTime);
+		Vector2 velocityDenormalized = new Vector2(targetVelocity.x * playerMovement.movement.x * Time.fixedDeltaTime, m_Rigidbody2D.velocity.y);
 		if (playerMovement.movement.x !=0 || playerMovement.movement.y !=0)
 		{
-			if(durabilityManager.decrementDurability() == false)
+			if(durabilityManager.decrementDurability() == false || m_Rigidbody2D.position.y <-1)
 			{
-				Debug.Log("T'es mort mec!");
+				Vector2 newPosition = new Vector2(respawnPoint.transform.position.x,respawnPoint.transform.position.y);
+				m_Rigidbody2D.MovePosition(newPosition);
+				durabilityManager.resetDurability();
 			}
 		}
 		m_Rigidbody2D.velocity = Vector2.SmoothDamp(m_Rigidbody2D.velocity, velocityDenormalized, ref currentVelocity, m_MovementSmoothing, maxVelocity*Time.deltaTime);

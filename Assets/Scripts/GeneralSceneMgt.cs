@@ -10,8 +10,6 @@ public class GeneralSceneMgt : MonoBehaviour
 
     private void Awake()
     {
-        //Screen.fullScreen = false;
-
         if (instance != null)
         {
             if (instance != this)
@@ -50,6 +48,12 @@ public class GeneralSceneMgt : MonoBehaviour
         SceneManager.LoadScene((int)SceneIndex.LEVEL1);
 
     }
+
+    public void GoToLoseScreen()
+    {
+        SceneManager.LoadScene((int)SceneIndex.ENDGAME);
+    }
+
 
     public void QuitGame()
     {

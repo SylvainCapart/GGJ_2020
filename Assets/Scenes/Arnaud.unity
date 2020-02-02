@@ -1262,7 +1262,7 @@ GameObject:
   - component: {fileID: 1048725842}
   - component: {fileID: 1048725841}
   m_Layer: 5
-  m_Name: Text
+  m_Name: Items
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1327,6 +1327,36 @@ RectTransform:
   m_AnchoredPosition: {x: -275.201, y: -91.10828}
   m_SizeDelta: {x: 69.2, y: 20.600006}
   m_Pivot: {x: -2.9234252, y: -1.738275}
+--- !u!1 &1154416772
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1154416773}
+  m_Layer: 0
+  m_Name: RespawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1154416773
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154416772}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.44, y: 1.14, z: -6.155211}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1170781629
 GameObject:
   m_ObjectHideFlags: 0
@@ -1486,7 +1516,7 @@ GameObject:
   - component: {fileID: 1554497313}
   - component: {fileID: 1554497312}
   m_Layer: 5
-  m_Name: Text
+  m_Name: LifeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1563,7 +1593,7 @@ GameObject:
   - component: {fileID: 1865105735}
   - component: {fileID: 1865105734}
   m_Layer: 5
-  m_Name: BarreDeVie
+  m_Name: LifeBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2363,6 +2393,7 @@ MonoBehaviour:
   playerMovement: {fileID: 6946329857397678251}
   targetVelocity: {x: 500, y: 0}
   maxVelocity: 1000
+  respawnPoint: {fileID: 1154416772}
   durabilityManager: {fileID: 1170781630}
   OnLandEvent:
     m_PersistentCalls:
@@ -2410,7 +2441,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6946329857397678253}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.604, y: 0.518, z: -6.155211}
+  m_LocalPosition: {x: 6.32, y: 1.28, z: -6.155211}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6946329857293745694}

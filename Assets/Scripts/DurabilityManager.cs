@@ -8,11 +8,12 @@ public class DurabilityManager : MonoBehaviour
     public int durability;
     public int durabilityMax;
 
-    public StatusIndicator statusIndicator; 
+    public StatusIndicator statusIndicator;
+
+
     void Start()
     {
         durability = durabilityMax;
-        Debug.Log("DurabilityManager initialized");
     }
 
     void Update()
@@ -40,6 +41,10 @@ public class DurabilityManager : MonoBehaviour
         return (durability >0);
     }
 
+    public void resetDurability()
+    {
+        durability = durabilityMax;
+    }
     public bool decrementDurability()
     {
         if (durability >0)
@@ -60,4 +65,5 @@ public class DurabilityManager : MonoBehaviour
         durability = value;
         return true;
     }
+
 }
