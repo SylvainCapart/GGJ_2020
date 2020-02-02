@@ -22,6 +22,7 @@ public class PartsManager : MonoBehaviour
     private List<Interactable> itemDetectedList = new List<Interactable>();
     public Interactable m_currentInteractable;
     public Transform m_AttachQuestion;
+    public Transform m_DropQuestion;
     public bool m_Rpressed = false;
     public int m_selectedIndex = 0;
     public SpotIndex m_SelectedSpot;
@@ -33,6 +34,16 @@ public class PartsManager : MonoBehaviour
     public Vector2 m_currentItemPosRef;
     public float m_MovementSmoothing = 0.5f;
     public float m_maxVelocityAttach = 1000f;
+    public bool m_DropDisplayed = false;
+    public int m_DropIndex = 0;
+
+    public Sprite m_normalSprite;
+    public Sprite m_selectedSprite;
+    public Color m_selectedColor;
+
+    private HingeJoint2D[] m_joints = new HingeJoint2D[10];
+    public bool m_ObjectEnters = false;
+
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +54,7 @@ public class PartsManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        m_ObjectEnters = false;
         Interactable newNearestInteractable = null;
         newNearestInteractable = Detect();
 
@@ -51,8 +63,48 @@ public class PartsManager : MonoBehaviour
             m_currentInteractable = newNearestInteractable;
         }
 
-        DisplayBind();
+        //if (m_DropDisplayed && m_ObjectEnters)
+        //{
+        //    m_DropDisplayed = false;
+        //    m_ObjectEnters = false;
+        //}
+
+        if (m_currentInteractable != null)
+        {
+            m_DropDisplayed = false;
+            DisplayUIDrop(false);
+            UnselectSprite(m_DropIndex);
+
+
+        }
+
+        if (!m_DropDisplayed)
+            DisplayBind();
         m_SelectedSpot = (SpotIndex)m_selectedIndex;
+
+        if (m_DropDisplayed)
+            DropSelect();
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            if (m_Attaching || CheckSpotsEmpty())
+            {
+
+                    m_DropDisplayed = false;
+                    DisplayUIDrop(false);
+                    DisplayAllAttach(false);
+                
+            }
+        else
+            {
+                if (m_currentInteractable == null)
+                {
+                    m_DropDisplayed = true;
+                    Dropintent();
+                }
+
+            }
+        }
 
     }
 
@@ -67,12 +119,23 @@ public class PartsManager : MonoBehaviour
         return full;
     }
 
+    public bool CheckSpotsEmpty()
+    {
+        bool empty = true;
+        foreach (var spot in spots)
+        {
+            if (spot.isTaken)
+                empty = false;
+        }
+        return empty;
+    }
+
     public void DisplayBind()
     {
         if (m_currentInteractable == null)
         {
-            DisplayUI(false);
-            DisplayAttach(false);
+            DisplayUIAttach(false);
+            DisplayAllAttach(false);
             return;
         }
 
@@ -82,7 +145,7 @@ public class PartsManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             m_Rpressed = true;
-            m_selectedIndex = (m_selectedIndex + 1) % spots.Length ;
+            m_selectedIndex = (m_selectedIndex + 1) % spots.Length;
 
             while (spots[m_selectedIndex].isTaken)
             {
@@ -103,26 +166,32 @@ public class PartsManager : MonoBehaviour
 
         DrawLine(spotPos, m_currentInteractable.transform.position, Color.cyan);
 
-        DisplayAttach(true);
-        DisplayUI(true);
+        DisplayFreeAttach(true);
+        DisplayUIAttach(true);
 
         if (Input.GetKeyDown(KeyCode.E) && !spots[m_selectedIndex].isTaken)
         {
             Interactable lockedInteractable = m_currentInteractable;
-            
+
             m_AttachCo = StartCoroutine(Attach(lockedInteractable, m_selectedIndex));
         }
 
     }
 
-    public void DisplayUI(bool state)
+    public void DisplayUIAttach(bool state)
     {
         m_AttachQuestion.gameObject.SetActive(state);
         m_AttachQuestion.transform.rotation = Quaternion.Euler(0, 0, 0);
     }
 
+    public void DisplayUIDrop(bool state)
+    {
+        m_DropQuestion.gameObject.SetActive(state);
+        m_DropQuestion.transform.rotation = Quaternion.Euler(0, 0, 0);
+    }
 
-    void DisplayAttach(bool state)
+
+    void DisplayFreeAttach(bool state)
     {
         foreach (var spot in spots)
         {
@@ -137,12 +206,113 @@ public class PartsManager : MonoBehaviour
         }
     }
 
+
+    void DisplayAllAttach(bool state)
+    {
+        foreach (var spot in spots)
+        {
+            SpriteRenderer rend = spot.tr.GetComponent<SpriteRenderer>();
+            if (rend != null)
+            {
+                rend.enabled = state;
+            }
+        }
+    }
+
+
+
+    void DisplayTakenAttach()
+    {
+        foreach (var spot in spots)
+        {
+            SpriteRenderer rend = spot.tr.GetComponent<SpriteRenderer>();
+            if (rend != null)
+            {
+                rend.enabled = false;
+
+                if (spot.isTaken)
+                    rend.enabled = true;
+            }
+        }
+    }
+
+    void SelectSprite(int spotIndex)
+    {
+        spots[spotIndex].tr.GetComponent<SpriteRenderer>().sprite = m_selectedSprite;
+    }
+
+    void SelectItem(int spotIndex)
+    {
+        if (spots[spotIndex].isTaken)
+            spots[spotIndex].tr.GetComponentInChildren<Interactable>().GetComponent<SpriteRenderer>().color = m_selectedColor;
+    }
+
+    void UnselectSprite(int spotIndex)
+    {
+        spots[spotIndex].tr.GetComponent<SpriteRenderer>().sprite = m_normalSprite;
+    }
+
+    public void Dropintent()
+    {
+        DisplayUIDrop(true);
+        DisplayAllAttach(true);
+        SelectSprite(m_DropIndex);
+        //SelectItem(m_DropIndex);
+    }
+
+    public void DropSelect()
+    {
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            DisplayUIDrop(false);
+            DisplayAllAttach(false);
+            m_DropDisplayed = false;
+            return;
+        }
+
+        if (!m_DropDisplayed)
+            return;
+
+        DisplayUIDrop(true);
+        DisplayAllAttach(true);
+        SelectSprite(m_DropIndex);
+
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            UnselectSprite(m_DropIndex);
+            m_DropIndex = (m_DropIndex + 1) % spots.Length;
+            SelectSprite(m_DropIndex);
+            //SelectItem(m_DropIndex);
+        }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            Drop(m_DropIndex);
+        }
+    }
+
+    public void Drop(int dropIndex)
+    {
+        if (!spots[dropIndex].isTaken)
+            return;
+
+        m_joints[dropIndex].enabled = false;
+        m_joints[dropIndex].breakForce = 0;
+        spots[dropIndex].isTaken = false;
+        //Destroy(m_joints[dropIndex]);
+
+        //m_joints[dropIndex].breakTorque = 0;
+        spots[dropIndex].tr.GetComponentInChildren<Interactable>().transform.parent = null;
+    }
+
     void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 0.1f)
     {
         GameObject m_line = new GameObject();
         m_line.transform.position = start;
         m_line.AddComponent<LineRenderer>();
- 
+
         LineRenderer lr = m_line.GetComponent<LineRenderer>();
         lr.material = new Material(Shader.Find("Unlit/NewUnlitShader"));
         lr.startColor = color;
@@ -186,9 +356,12 @@ public class PartsManager : MonoBehaviour
     {
         if (!m_Attaching)
         {
-            if (spots[lockedIndex].tr.transform.position.y < GameObject.FindGameObjectWithTag("Player").transform.position.y)
+            Vector3 oldPos = transform.position;
+            Vector3 newPos = oldPos + new Vector3(0, 1.3f, 0);
+            if (spots[lockedIndex].tr.transform.position.y < transform.position.y)
             {
-                GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, m_AttachForceUp));
+                transform.position = newPos;
+                transform.GetComponent<Rigidbody2D>().gravityScale = 0;
             }
 
             m_Attaching = true;
@@ -205,6 +378,7 @@ public class PartsManager : MonoBehaviour
                 hingejoint.breakForce = 1000;
                 hingejoint.breakTorque = 1000;
                 hingejoint.connectedBody = itemRB;
+                m_joints[lockedIndex] = hingejoint;
 
                 Vector3 vectorBind = spots[lockedIndex].tr.transform.position - item.transform.position;
                 Vector3 vectorAttach = item.attach.position - item.transform.position;
@@ -231,7 +405,9 @@ public class PartsManager : MonoBehaviour
                 spots[lockedIndex].isTaken = true;
             }
 
-        m_Attaching = false;
+            transform.GetComponent<Rigidbody2D>().gravityScale = 1;
+
+            m_Attaching = false;
 
         }
 
@@ -264,6 +440,8 @@ public class PartsManager : MonoBehaviour
         if (item != null && !itemDetectedList.Contains(item))
         {
             itemDetectedList.Add(item);
+            Debug.Log("ENTER");
+            m_ObjectEnters = true;
 
         }
     }

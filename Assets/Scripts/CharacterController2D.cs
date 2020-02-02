@@ -26,8 +26,9 @@ public class CharacterController2D : MonoBehaviour
 	private Vector2 currentVelocity;
     public PartsManager m_PartsManager;
 
+    public float m_DeathYPos;
 
-	private bool called;
+    private bool called;
 
 	
 
@@ -115,7 +116,7 @@ public class CharacterController2D : MonoBehaviour
         }
         if (playerMovement.movement.x != 0 || playerMovement.movement.y != 0)
         {
-            if (durabilityManager.decrementDurability() == false || m_Rigidbody2D.position.y < -1)
+            if (durabilityManager.decrementDurability() == false || m_Rigidbody2D.position.y < m_DeathYPos)
             {
 
                 Vector2 newPosition = new Vector2(respawnPoint.transform.position.x, respawnPoint.transform.position.y);
