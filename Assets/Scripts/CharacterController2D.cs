@@ -23,6 +23,7 @@ public class CharacterController2D : MonoBehaviour
 
 	public float maxVelocity;
 	private Vector2 currentVelocity;
+    public PartsManager m_PartsManager;
 
 	private bool called;
 
@@ -37,6 +38,7 @@ public class CharacterController2D : MonoBehaviour
 
 	public BoolEvent OnCrouchEvent;
 	private bool m_wasCrouching = false;
+    public float m_rotateForce = 2;
 
 
 	private void Awake()
@@ -52,27 +54,74 @@ public class CharacterController2D : MonoBehaviour
 		called = false;
 	}
 
-	private void FixedUpdate()
-	{
-		Vector2 velocityDenormalized = new Vector2(targetVelocity.x * playerMovement.movement.x * Time.fixedDeltaTime, targetVelocity.x * playerMovement.movement.y * Time.fixedDeltaTime);
-//		Debug.Log("Set speed x to " + velocityDenormalized.x);				
-		m_Rigidbody2D.velocity = Vector2.SmoothDamp(m_Rigidbody2D.velocity, velocityDenormalized, ref currentVelocity, m_MovementSmoothing, maxVelocity*Time.deltaTime);
-		// bool wasGrounded = m_Grounded;
-		// m_Grounded = false;
+    private void FixedUpdate()
+    {
+        bool oneTaken = HasOneSpotTakenAtLeast();
+        if (oneTaken)
+        {
+            m_Rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
+        else
+        {
+            m_Rigidbody2D.constraints = 0;
+        }
 
-		// // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
-		// // This can be done using layers instead but Sample Assets will not overwrite your project settings.
-		// Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
-		// for (int i = 0; i < colliders.Length; i++)
-		// {
-		// 	if (colliders[i].gameObject != gameObject)
-		// 	{
-		// 		m_Grounded = true;
-		// 		if (!wasGrounded)
-		// 			OnLandEvent.Invoke();
-		// 	}
-		// }
-	}
+        if (!m_PartsManager.m_Attaching)
+        {
+            Vector2 velocityDenormalized = new Vector2(targetVelocity.x * playerMovement.movement.x * Time.fixedDeltaTime, targetVelocity.x * playerMovement.movement.y * Time.fixedDeltaTime);
+            m_Rigidbody2D.velocity = Vector2.SmoothDamp(m_Rigidbody2D.velocity, velocityDenormalized, ref currentVelocity, m_MovementSmoothing, maxVelocity * Time.deltaTime);
+
+            if (Input.GetKey(KeyCode.LeftShift) )
+            {
+                //m_Rigidbody2D.rotation += m_rotateForce;
+                transform.Rotate(0, 0, m_rotateForce, Space.Self);
+
+                foreach (var spot in m_PartsManager.spots)
+                {
+                    if (spot.isTaken)
+                    {
+                        Rigidbody2D rb = spot.tr.transform.GetComponentInChildren<Rigidbody2D>();
+                        if (rb != null)
+                        {
+                            //rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+                            rb.rotation += m_rotateForce;
+                        }
+                    }
+
+                }
+            }
+
+            //if (Input.GetKeyUp(KeyCode.LeftShift))
+            //{
+            //    foreach (var spot in m_PartsManager.spots)
+            //    {
+            //        if (spot.isTaken)
+            //        {
+            //            //Rigidbody2D rb = spot.tr.transform.GetComponentInChildren<Rigidbody2D>();
+            //            //if (rb != null)
+            //            //{
+            //            //    rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            //            //}
+            //        }
+
+            //    }
+
+            //}
+        }
+    }
+
+    public bool HasOneSpotTakenAtLeast()
+    {
+        bool taken = false;
+        foreach (var spot in m_PartsManager.spots)
+        {
+            if (spot.isTaken)
+            {
+                taken = true;
+            }
+        }
+        return taken;
+    }
 
 
 	public void Move()

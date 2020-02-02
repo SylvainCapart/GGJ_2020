@@ -26,7 +26,13 @@ public class PartsManager : MonoBehaviour
     public int m_selectedIndex = 0;
     public SpotIndex m_SelectedSpot;
     public float m_offset;
-
+    Coroutine m_AttachCo;
+    public bool m_Attaching = false;
+    public float m_AttachDelay = 2.0f;
+    public float m_AttachForceUp = 200.0f;
+    public Vector2 m_currentItemPosRef;
+    public float m_MovementSmoothing = 0.5f;
+    public float m_maxVelocityAttach = 1000f;
 
     // Start is called before the first frame update
     void Start()
@@ -102,7 +108,9 @@ public class PartsManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E) && !spots[m_selectedIndex].isTaken)
         {
-            Attach(m_currentInteractable);
+            Interactable lockedInteractable = m_currentInteractable;
+            
+            m_AttachCo = StartCoroutine(Attach(lockedInteractable, m_selectedIndex));
         }
 
     }
@@ -174,35 +182,60 @@ public class PartsManager : MonoBehaviour
         return nearestSpot;
     }
 
-    public void Attach(Interactable item)
+    public IEnumerator Attach(Interactable item, int lockedIndex)
     {
-        m_Rpressed = false;
-
-        Rigidbody2D itemRB = item.GetComponent<Rigidbody2D>();
-
-        if (itemRB != null)
+        if (!m_Attaching)
         {
-            HingeJoint2D hingejoint = gameObject.AddComponent<HingeJoint2D>();
-            hingejoint.breakForce = 1000;
-            hingejoint.breakTorque = 1000;
-            hingejoint.connectedBody = itemRB;
+            if (spots[lockedIndex].tr.transform.position.y < GameObject.FindGameObjectWithTag("Player").transform.position.y)
+            {
+                GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0, m_AttachForceUp));
+            }
 
-            Vector3 vectorBind = spots[m_selectedIndex].tr.transform.position - item.transform.position;
-            Vector3 vectorAttach = item.attach.position - item.transform.position;
-            Vector3 vectorInner = spots[m_selectedIndex].tr.transform.position - GameObject.FindGameObjectWithTag("Player").transform.position;
-            float attachDiff = Vector2.Distance(item.attach.position, item.transform.position);
-            float angle = Vector2.SignedAngle(vectorBind, vectorAttach);
+            m_Attaching = true;
+
+            yield return new WaitForSeconds(m_AttachDelay);
+
+            m_Rpressed = false;
+
+            Rigidbody2D itemRB = item.GetComponent<Rigidbody2D>();
+
+            if (itemRB != null)
+            {
+                HingeJoint2D hingejoint = gameObject.AddComponent<HingeJoint2D>();
+                hingejoint.breakForce = 1000;
+                hingejoint.breakTorque = 1000;
+                hingejoint.connectedBody = itemRB;
+
+                Vector3 vectorBind = spots[lockedIndex].tr.transform.position - item.transform.position;
+                Vector3 vectorAttach = item.attach.position - item.transform.position;
+                Vector3 vectorInner = spots[lockedIndex].tr.transform.position - GameObject.FindGameObjectWithTag("Player").transform.position;
+                float attachDiff = Vector2.Distance(item.attach.position, item.transform.position);
+                float angle = Vector2.SignedAngle(vectorBind, vectorAttach);
 
 
-            itemRB.constraints = RigidbodyConstraints2D.FreezeRotation;
-            item.transform.Rotate(0, 0, -angle);
-            item.transform.position = spots[m_selectedIndex].tr.transform.position - vectorBind.normalized * (attachDiff + m_offset);
+                itemRB.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-            float innerAngle = Vector2.SignedAngle(vectorBind, vectorInner);
-            item.transform.Rotate(0, 0, -innerAngle);
+                item.transform.position = spots[lockedIndex].tr.transform.position;// - vectorBind.normalized * (attachDiff + m_offset);
 
-            spots[m_selectedIndex].isTaken = true;
+                float innerAngle = Vector2.SignedAngle(vectorAttach, vectorInner);
+                item.transform.Rotate(0, 0, 180 + innerAngle);
+
+
+                //item.transform.position = Vector2.SmoothDamp(item.transform.position, spots[m_selectedIndex].tr.transform.position, ref m_currentItemPosRef, m_MovementSmoothing);
+
+                item.transform.position += vectorInner.normalized * attachDiff;
+                item.transform.parent = spots[lockedIndex].tr.transform;
+                //item.transform.rotation = Quaternion.Euler(new Vector3(0,0, innerAngle));
+
+                //GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
+                spots[lockedIndex].isTaken = true;
+            }
+
+        m_Attaching = false;
+
         }
+
+        yield return null;
     }
 
     public Interactable Detect()
@@ -231,7 +264,7 @@ public class PartsManager : MonoBehaviour
         if (item != null && !itemDetectedList.Contains(item))
         {
             itemDetectedList.Add(item);
-            m_Rpressed = false;
+
         }
     }
 
@@ -242,7 +275,7 @@ public class PartsManager : MonoBehaviour
         if (item != null && itemDetectedList.Contains(item))
         {
             itemDetectedList.Remove(item);
-            m_Rpressed = false;
+
         }
     }
 
