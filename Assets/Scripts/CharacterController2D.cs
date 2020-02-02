@@ -22,12 +22,17 @@ public class CharacterController2D : MonoBehaviour
 	public Vector2 targetVelocity;
 
 	public float maxVelocity;
+	public GameObject respawnPoint; 
 	private Vector2 currentVelocity;
     public PartsManager m_PartsManager;
 
+
 	private bool called;
 
+	
 
+	public DurabilityManager durabilityManager;
+	
 	[Header("Events")]
 	[Space]
 
@@ -43,8 +48,6 @@ public class CharacterController2D : MonoBehaviour
 
 	private void Awake()
 	{
-
-
 		if (OnLandEvent == null)
 			OnLandEvent = new UnityEvent();
 
@@ -209,4 +212,13 @@ public class CharacterController2D : MonoBehaviour
 	}
 	
 
+			if(durabilityManager.decrementDurability() == false || m_Rigidbody2D.position.y <-1)
+		{
+		if (playerMovement.movement.x !=0 || playerMovement.movement.y !=0)
+				Vector2 newPosition = new Vector2(respawnPoint.transform.position.x,respawnPoint.transform.position.y);
+			{
+				m_Rigidbody2D.MovePosition(newPosition);
+				durabilityManager.resetDurability();
+			}
+		}
 }
