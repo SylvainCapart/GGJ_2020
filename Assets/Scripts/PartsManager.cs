@@ -74,8 +74,6 @@ public class PartsManager : MonoBehaviour
             m_DropDisplayed = false;
             DisplayUIDrop(false);
             UnselectSprite(m_DropIndex);
-
-
         }
 
         if (!m_DropDisplayed)
@@ -90,12 +88,12 @@ public class PartsManager : MonoBehaviour
             if (m_Attaching || CheckSpotsEmpty())
             {
 
-                    m_DropDisplayed = false;
-                    DisplayUIDrop(false);
-                    DisplayAllAttach(false);
-                
+                m_DropDisplayed = false;
+                DisplayUIDrop(false);
+                DisplayAllAttach(false);
+
             }
-        else
+            else
             {
                 if (m_currentInteractable == null)
                 {
@@ -164,7 +162,7 @@ public class PartsManager : MonoBehaviour
             spotPos = spots[m_selectedIndex].tr.transform.position;
         }
 
-        DrawLine(spotPos, m_currentInteractable.transform.position, Color.cyan);
+        DrawLine(spotPos, m_currentInteractable.transform.GetComponent<Interactable>().attach.position, Color.cyan);
 
         DisplayFreeAttach(true);
         DisplayUIAttach(true);
@@ -304,7 +302,16 @@ public class PartsManager : MonoBehaviour
         //Destroy(m_joints[dropIndex]);
 
         //m_joints[dropIndex].breakTorque = 0;
+        spots[dropIndex].tr.GetComponentInChildren<Interactable>().transform.tag = "Untagged";
         spots[dropIndex].tr.GetComponentInChildren<Interactable>().transform.parent = null;
+    }
+
+    public void DropAll()
+    {
+        for (int i = 0; i < spots.Length; i++)
+        {
+            Drop(i);
+        }
     }
 
     void DrawLine(Vector3 start, Vector3 end, Color color, float duration = 0.1f)
@@ -362,6 +369,11 @@ public class PartsManager : MonoBehaviour
             {
                 transform.position = newPos;
                 transform.GetComponent<Rigidbody2D>().gravityScale = 0;
+
+                foreach (var rb in GetComponentsInChildren<Rigidbody2D>())
+                {
+                    rb.gravityScale = 0;
+                }
             }
 
             m_Attaching = true;
@@ -399,6 +411,7 @@ public class PartsManager : MonoBehaviour
 
                 item.transform.position += vectorInner.normalized * attachDiff;
                 item.transform.parent = spots[lockedIndex].tr.transform;
+                item.transform.tag = "Player";
                 //item.transform.rotation = Quaternion.Euler(new Vector3(0,0, innerAngle));
 
                 //GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
@@ -406,6 +419,11 @@ public class PartsManager : MonoBehaviour
             }
 
             transform.GetComponent<Rigidbody2D>().gravityScale = 1;
+
+            foreach (var rb in GetComponentsInChildren<Rigidbody2D>())
+            {
+                rb.gravityScale = 1;
+            }
 
             m_Attaching = false;
 

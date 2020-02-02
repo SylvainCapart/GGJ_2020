@@ -123,6 +123,7 @@ public class CharacterController2D : MonoBehaviour
                 transform.position = newPosition;
                 // m_Rigidbody2D.MovePosition(newPosition);
                 durabilityManager.resetDurability();
+                m_PartsManager.DropAll();
             }
         }
     }
