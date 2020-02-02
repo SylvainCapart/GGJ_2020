@@ -3,7 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class GeneralSceneMgt : MonoBehaviour
 {
-    public enum SceneIndex {MENU, GAME, ENDGAME};
+    public enum SceneIndex {MENU, LEVEL1, LEVEL2, ENDGAME};
 
     public static GeneralSceneMgt instance;
     public SceneIndex sceneIndex;
@@ -26,9 +26,9 @@ public class GeneralSceneMgt : MonoBehaviour
         }
     }
 
-    public void GoToScene()
+    public void GoToNextScene()
     {
-        SceneManager.LoadScene((int)sceneIndex);
+        SceneManager.LoadScene((int)sceneIndex + 1);
     }
 
     public void GoToMenu()
@@ -47,7 +47,7 @@ public class GeneralSceneMgt : MonoBehaviour
   //      if (System.Math.Abs(Time.timeScale - 1f) > EPSILON)
   //          Time.timeScale = 1f;
 
-        SceneManager.LoadScene((int)SceneIndex.GAME);
+        SceneManager.LoadScene((int)SceneIndex.LEVEL1);
 
     }
 
