@@ -43,6 +43,7 @@ public class PartsManager : MonoBehaviour
 
     private HingeJoint2D[] m_joints = new HingeJoint2D[10];
     public bool m_ObjectEnters = false;
+    public DurabilityManager m_Dura;
 
 
     // Start is called before the first frame update
@@ -416,6 +417,7 @@ public class PartsManager : MonoBehaviour
 
                 //GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeRotation;
                 spots[lockedIndex].isTaken = true;
+                m_Dura.augmentDurability(220);
             }
 
             transform.GetComponent<Rigidbody2D>().gravityScale = 1;

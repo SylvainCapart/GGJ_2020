@@ -5,7 +5,7 @@ using UnityEngine;
 public class ArmHit : MonoBehaviour
 {
 
-
+    
     private float oldRotation;
     public float m_angle;
     void Start()
@@ -24,9 +24,13 @@ public class ArmHit : MonoBehaviour
 
         if ( tag == "Player")
         {
-            if (Input.GetKey(KeyCode.F))
+            if (Input.GetKeyDown(KeyCode.F))
             {
-                transform.Rotate(0, 0, m_angle);
+                GetComponent<Animator>().SetBool("Hit", true);
+            }
+            else
+            {
+                GetComponent<Animator>().SetBool("Hit", false);
             }
   
         }
